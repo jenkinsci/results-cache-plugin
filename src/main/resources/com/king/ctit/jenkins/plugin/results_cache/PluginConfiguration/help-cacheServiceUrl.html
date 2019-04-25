@@ -1,0 +1,30 @@
+<!--
+    Copyright (C) king.com Ltd 2019
+    https://github.com/king/results-cache-plugin
+    License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
+-->
+<div>
+    <p>URL of the cache server.</p>
+    <p>
+        <b>How to configure your own results cache service</b><br/>
+        You can use the reference implementation in <a href="https://github.com/king/results-cache-service">https://github.com/king/results-cache-service</a> or implement your own server. To do that you need to provide the following API:
+        <ul>
+            <li>
+                POST /job-results/{hash}/{result}: adds a new result in the cache for the provided job hash.<br/>
+                Path parameters:
+                <ul>
+                    <li>hash: calculated hash for the job execution</li>
+                    <li>result: job result</li>
+                </ul>
+            </li>
+            <li>GET /job-results/{hash}: returns a cached result from a job hash. Returns 'NOT_BUILT' if the job hash is not found.<br/>
+                Path parameters:
+                <ul>
+                    <li>hash: calculated hash for the job execution</li>
+                </ul>
+            </li>
+             <li>DELETE /job-results/clear: cleans the cache values.</li>
+        </ul>
+    </p>
+</div>
+
