@@ -4,6 +4,7 @@
 
 package hudson.plugins.resultscache.util;
 
+import hudson.plugins.resultscache.model.BuildData;
 import hudson.EnvVars;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
