@@ -26,8 +26,8 @@ public class RestClientUtil {
 
     /**
      * Constructor
-     * @param connectionTimeout
-     * @param socketTimeout
+     * @param connectionTimeout connectionTimeout in milliseconds
+     * @param socketTimeout socketTimeout in milliseconds
      */
     public RestClientUtil(int connectionTimeout, int socketTimeout) {
         this.connectionTimeout = connectionTimeout;

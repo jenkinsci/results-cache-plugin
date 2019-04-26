@@ -17,8 +17,8 @@ public class URLEncoder {
 
     /**
      * URL encodes the url using UTF-8
-     * @param value
-     * @return
+     * @param value url to encode
+     * @return encoded url
      */
     public static String encode(String value) {
         try {
