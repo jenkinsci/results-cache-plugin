@@ -2,10 +2,10 @@
 // https://github.com/king/results-cache-plugin
 // License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
 
-package com.king.ctit.jenkins.plugin.results_cache.util;
+package hudson.plugins.resultscache.util;
 
-import com.king.ctit.jenkins.plugin.results_cache.model.BuildData;
 import hudson.EnvVars;
+import hudson.plugins.resultscache.model.BuildData;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

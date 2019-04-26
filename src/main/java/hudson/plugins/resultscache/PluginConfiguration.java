@@ -2,14 +2,14 @@
 // https://github.com/king/results-cache-plugin
 // License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
 
-package com.king.ctit.jenkins.plugin.results_cache;
+package hudson.plugins.resultscache;
 
-import hudson.Extension;
-import hudson.util.FormValidation;
-import jenkins.model.GlobalConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
+import hudson.Extension;
+import hudson.util.FormValidation;
+import jenkins.model.GlobalConfiguration;
 
 @Extension
 public class PluginConfiguration extends GlobalConfiguration {

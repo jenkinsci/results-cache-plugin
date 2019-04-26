@@ -2,15 +2,19 @@
 // https://github.com/king/results-cache-plugin
 // License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
 
-package com.king.ctit.jenkins.plugin.results_cache.util;
+package hudson.plugins.resultscache.util;
 
 import org.apache.commons.io.IOUtils;
-
-import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.X509Certificate;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * REST client utility

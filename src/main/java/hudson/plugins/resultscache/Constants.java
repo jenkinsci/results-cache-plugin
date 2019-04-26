@@ -1,4 +1,4 @@
-package com.king.ctit.jenkins.plugin.results_cache;
+package hudson.plugins.resultscache;
 
 public class Constants {
 

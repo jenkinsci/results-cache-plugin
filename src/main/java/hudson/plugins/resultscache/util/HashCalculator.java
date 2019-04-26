@@ -2,11 +2,11 @@
 // https://github.com/king/results-cache-plugin
 // License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
 
-package com.king.ctit.jenkins.plugin.results_cache.util;
+package hudson.plugins.resultscache.util;
 
-import com.king.ctit.jenkins.plugin.results_cache.model.BuildData;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
+import hudson.plugins.resultscache.model.BuildData;
 
 /**
  * This class calculates a hash from a Jenkins Job data to be used to identify it in the results cache

@@ -2,24 +2,28 @@
 // https://github.com/king/results-cache-plugin
 // License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
 
-package com.king.ctit.jenkins.plugin.results_cache;
+package hudson.plugins.resultscache;
 
-import com.king.ctit.jenkins.plugin.results_cache.util.CacheServerComm;
-import com.king.ctit.jenkins.plugin.results_cache.util.HashCalculator;
-import com.king.ctit.jenkins.plugin.results_cache.util.LoggerUtil;
+import org.apache.commons.lang.StringUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Executor;
+import hudson.model.Result;
+import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
+import hudson.plugins.resultscache.util.CacheServerComm;
+import hudson.plugins.resultscache.util.HashCalculator;
+import hudson.plugins.resultscache.util.LoggerUtil;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import jenkins.model.CauseOfInterruption;
-import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.annotation.Nonnull;
-import java.io.IOException;
 
 public class PluginBuildWrapper extends BuildWrapper {
 

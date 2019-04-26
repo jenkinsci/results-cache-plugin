@@ -2,7 +2,7 @@
 // https://github.com/king/results-cache-plugin
 // License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
 
-package com.king.ctit.jenkins.plugin.results_cache.util;
+package hudson.plugins.resultscache.util;
 
 import org.apache.commons.codec.digest.DigestUtils;
 

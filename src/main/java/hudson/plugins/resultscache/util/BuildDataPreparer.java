@@ -2,15 +2,14 @@
 // https://github.com/king/results-cache-plugin
 // License: Apache 2.0, https://raw.githubusercontent.com/king/results-cache-plugin/master/LICENSE-APACHE
 
-package com.king.ctit.jenkins.plugin.results_cache.util;
+package hudson.plugins.resultscache.util;
 
-import com.king.ctit.jenkins.plugin.results_cache.model.BuildData;
-import hudson.EnvVars;
 import org.apache.commons.lang.StringUtils;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import hudson.EnvVars;
+import hudson.plugins.resultscache.model.BuildData;
 
 /**
  * This class prepares a string from a BuildData instance. This string will be used to create a hash which identifies a Jenkins Job in the result cache.
