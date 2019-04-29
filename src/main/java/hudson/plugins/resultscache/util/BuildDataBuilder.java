@@ -5,9 +5,9 @@
 package hudson.plugins.resultscache.util;
 
 import hudson.EnvVars;
-import hudson.model.AbstractBuild;
 import hudson.model.ParameterValue;
 import hudson.model.ParametersAction;
+import hudson.model.Run;
 import hudson.plugins.resultscache.model.BuildData;
 import jenkins.model.Jenkins;
 
@@ -28,7 +28,7 @@ public class BuildDataBuilder {
      * @param build Jenkins Job AbstractBuild instance
      * @return BuildData instance from a Jenkins Job AbstractBuild instance
      */
-    public BuildData build(AbstractBuild build) {
+    public BuildData build(Run build) {
         BuildData buildData = new BuildData();
         buildData.setCiUrl(Jenkins.getInstance().getRootUrl());
         buildData.setFullJobName(build.getParent().getFullName());

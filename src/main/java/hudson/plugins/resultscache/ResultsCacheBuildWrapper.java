@@ -4,34 +4,43 @@
 
 package hudson.plugins.resultscache;
 
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Executor;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
+import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.util.CacheServerComm;
 import hudson.plugins.resultscache.util.HashCalculator;
 import hudson.plugins.resultscache.util.LoggerUtil;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
-import jenkins.model.CauseOfInterruption;
 
-public class PluginBuildWrapper extends BuildWrapper {
+public class ResultsCacheBuildWrapper extends BuildWrapper {
 
+    private boolean excludeMachineName;
     private String hashParameters;
+    private BuildConfig buildConfig;
 
     @DataBoundConstructor
-    public PluginBuildWrapper(String hashParameters) {
+    public ResultsCacheBuildWrapper(boolean excludeMachineName, String hashParameters) {
+        this.excludeMachineName = excludeMachineName;
         this.hashParameters = hashParameters;
+        this.buildConfig = new BuildConfig(excludeMachineName, hashParameters);
+    }
+
+    public boolean isExcludeMachineName() {
+        return excludeMachineName;
+    }
+
+    public void setExcludeMachineName(boolean excludeMachineName) {
+        this.excludeMachineName = excludeMachineName;
     }
 
     public String getHashParameters() {
@@ -44,54 +53,12 @@ public class PluginBuildWrapper extends BuildWrapper {
 
     @Override
     public void preCheckout(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-        if (StringUtils.isEmpty(getCacheServiceUrl())) {
-            LoggerUtil.warn(listener, "(Pre-Checkout) Unable to check cached result because 'cacheServiceUrl' is not defined %n");
-        } else {
-            String jobHash = new HashCalculator().calculate(build, hashParameters, listener);
-            LoggerUtil.info(listener, "(Pre-Checkout) Checking cached result for this job (hash: %s) %n", jobHash);
-
-            Result result = Result.NOT_BUILT;
-            CacheServerComm cacheServer = new CacheServerComm(getCacheServiceUrl(), getTimeout());
-            try {
-                result = cacheServer.getCachedResult(jobHash);
-                LoggerUtil.info(listener, "(Pre-Checkout) Cached result for this job (hash: %s) is %s %n", jobHash, result.toString());
-            } catch (IOException e) {
-                LoggerUtil.warn(listener, "(Pre-Checkout) Unable to get cached result for this job (hash: %s). Exception: %s %n", jobHash, e.getMessage());
-            }
-
-            if (result.equals(Result.SUCCESS)) {
-                Executor executor = build.getExecutor();
-                if (executor != null) {
-                    if (executor.isActive()) {
-                        createWorkspace(build.getWorkspace());
-                        executor.interrupt(result, new CauseOfInterruption() {
-                            @Override
-                            public String getShortDescription() {
-                                return String.format(Constants.LOG_LINE_HEADER + "[INFO] This job (hash: %s) was interrupted because a SUCCESS result is cached %n", jobHash);
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Creates the supplied Workspace file path
-     *
-     * @param ws filepath to the workspace
-     * @throws IOException          if the workspace could not be created
-     * @throws InterruptedException if the process was interrupted
-     */
-    public void createWorkspace(FilePath ws) throws IOException, InterruptedException {
-        if (ws != null) {
-            ws.mkdirs();
-        }
+        ResultsCacheHelper.checkCacheOrExecute(build, listener, buildConfig);
     }
 
     @Override
     public Environment setUp(AbstractBuild build, Launcher launcher, BuildListener listener) {
-        String jobHash = new HashCalculator().calculate(build, hashParameters, null);
+        String jobHash = new HashCalculator().calculate(build, buildConfig);
         return new MyEnvironment(jobHash);
     }
 
@@ -113,7 +80,7 @@ public class PluginBuildWrapper extends BuildWrapper {
     }
 
     @Extension
-    public static class PluginDescriptor extends BuildWrapperDescriptor {
+    public static class DescriptorImpl extends BuildWrapperDescriptor {
 
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
@@ -127,18 +94,18 @@ public class PluginBuildWrapper extends BuildWrapper {
     }
 
     @Extension
-    public static class PluginRunListener extends RunListener<AbstractBuild> {
+    public static class RunListenerImpl extends RunListener<AbstractBuild> {
 
         @Override
         public void onCompleted(AbstractBuild build, @Nonnull TaskListener listener) {
             build.getEnvironments().stream()
-                    .filter(e -> e.getClass().getName().startsWith(PluginBuildWrapper.class.getName()))
+                    .filter(e -> e.getClass().getName().startsWith(ResultsCacheBuildWrapper.class.getName()))
                     .findFirst()
                     .ifPresent(e -> saveResultToCache(build, listener, ((MyEnvironment) e).getJobHash()));
         }
 
         private void saveResultToCache(AbstractBuild build, TaskListener listener, String jobHash) {
-            CacheServerComm cacheServer = new CacheServerComm(PluginBuildWrapper.getCacheServiceUrl(), PluginBuildWrapper.getTimeout());
+            CacheServerComm cacheServer = new CacheServerComm(ResultsCacheHelper.getCacheServiceUrl(), ResultsCacheHelper.getTimeout());
             Result r = (null != build) ? build.getResult() : Result.NOT_BUILT;
             LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: hash: %s) %n", r, jobHash);
 
@@ -149,13 +116,5 @@ public class PluginBuildWrapper extends BuildWrapper {
                 LoggerUtil.warn(listener, "(Update status: FAILURE) Unable to connect with cache server. Exception: %s %n", e.getMessage());
             }
         }
-    }
-
-    private static String getCacheServiceUrl() {
-        return PluginConfiguration.get().getCacheServiceUrl();
-    }
-
-    private static int getTimeout() {
-        return PluginConfiguration.get().getTimeoutInt();
     }
 }

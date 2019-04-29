@@ -6,6 +6,9 @@
 -->
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry field="excludeMachineName" title="${%Exclude Jenkins Machine Name}">
+        <f:checkbox/>
+    </f:entry>
     <f:entry field="hashParameters" title="${%Hashable Parameters}">
         <f:textbox/>
     </f:entry>

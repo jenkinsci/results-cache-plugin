@@ -17,9 +17,7 @@ public class BuildData {
 
     private EnvVars parameters;
 
-    public BuildData(String ciUrl,
-                      String fullJobName,
-                      EnvVars parameters) {
+    public BuildData(String ciUrl, String fullJobName, EnvVars parameters) {
         this.ciUrl = ciUrl;
         this.fullJobName = fullJobName;
         this.parameters = parameters;

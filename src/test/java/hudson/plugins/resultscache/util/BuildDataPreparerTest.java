@@ -4,8 +4,9 @@
 
 package hudson.plugins.resultscache.util;
 
-import hudson.EnvVars;
+import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.model.BuildData;
+import hudson.EnvVars;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,8 +29,22 @@ public class BuildDataPreparerTest {
         data.setCiUrl("https://my-jenkins-server.com/");
         data.setFullJobName("myfolder/myjob");
 
-        String result = uit.prepare(data, "");
+        BuildConfig buildConfig = new BuildConfig("");
+
+        String result = uit.prepare(data, buildConfig);
         Assert.assertEquals("https://my-jenkins-server.com/;myfolder/myjob;[]", result);
+    }
+
+    @Test
+    public void check_not_included_machine_name() {
+        BuildData data = new BuildData();
+        data.setCiUrl("https://my-jenkins-server.com/");
+        data.setFullJobName("myfolder/myjob");
+
+        BuildConfig buildConfig = new BuildConfig(true, "");
+
+        String result = uit.prepare(data, buildConfig);
+        Assert.assertEquals("myfolder/myjob;[]", result);
     }
 
     @Test
@@ -44,7 +59,9 @@ public class BuildDataPreparerTest {
 
         data.setParameters(parameters);
 
-        String result = uit.prepare(data, "PARAM_1,PARAM_2");
+        BuildConfig buildConfig = new BuildConfig("PARAM_1,PARAM_2");
+
+        String result = uit.prepare(data, buildConfig);
         Assert.assertEquals("https://my-jenkins-server.com/;myfolder/myjob;[PARAM_1=VALUE_1,PARAM_2=VALUE_2]", result);
     }
 
@@ -60,7 +77,9 @@ public class BuildDataPreparerTest {
 
         data.setParameters(parameters);
 
-        String result = uit.prepare(data, "PARAM_1,PARAM_2");
+        BuildConfig buildConfig = new BuildConfig("PARAM_1,PARAM_2");
+
+        String result = uit.prepare(data, buildConfig);
         Assert.assertEquals("https://my-jenkins-server.com/;myfolder/myjob;[PARAM_1=VALUE_1,PARAM_2=VALUE_2]", result);
     }
 
@@ -76,7 +95,9 @@ public class BuildDataPreparerTest {
 
         data.setParameters(parameters);
 
-        String result = uit.prepare(data, "");
+        BuildConfig buildConfig = new BuildConfig("");
+
+        String result = uit.prepare(data, buildConfig);
         Assert.assertEquals("https://my-jenkins-server.com/;myfolder/myjob;[PARAM_1=VALUE_1,PARAM_2=VALUE_2]", result);
     }
 
@@ -92,7 +113,9 @@ public class BuildDataPreparerTest {
 
         data.setParameters(parameters);
 
-        String result = uit.prepare(data, "PARAM_1");
+        BuildConfig buildConfig = new BuildConfig( "PARAM_1");
+
+        String result = uit.prepare(data, buildConfig);
         Assert.assertEquals("https://my-jenkins-server.com/;myfolder/myjob;[PARAM_1=VALUE_1]", result);
     }
 }

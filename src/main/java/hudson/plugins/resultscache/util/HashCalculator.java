@@ -4,9 +4,10 @@
 
 package hudson.plugins.resultscache.util;
 
-import hudson.model.AbstractBuild;
-import hudson.model.TaskListener;
+import hudson.model.Run;
+import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.model.BuildData;
+import hudson.model.TaskListener;
 
 /**
  * This class calculates a hash from a Jenkins Job data to be used to identify it in the results cache
@@ -28,17 +29,28 @@ public class HashCalculator {
     }
 
     /**
-     * Calculates a job hash from a jenkins job and its configured hashableParameters
+     * Calculates a job hash from a jenkins job
      * @param build jenkins job data
-     * @param hashParameters configured job parameters to be used to calculate the job hash
+     * @param buildConfig step configuration
+     * @return calculated job hash
+     */
+    public String calculate(Run build, BuildConfig buildConfig) {
+        return calculate(build, buildConfig, null);
+    }
+
+    /**
+     * Calculates a job hash from a jenkins job
+     * @param build jenkins job data
+     * @param buildConfig step configuration
      * @param listener task listener to write log traces
      * @return calculated job hash
      */
-    public String calculate(AbstractBuild build, String hashParameters, TaskListener listener) {
+    public String calculate(Run build, BuildConfig buildConfig, TaskListener listener) {
         BuildData data = dataBuilder.build(build);
-        String preparedData = dataPreparer.prepare(data, hashParameters);
-        if (listener != null)
+        String preparedData = dataPreparer.prepare(data, buildConfig);
+        if (listener != null) {
             LoggerUtil.info(listener, "(Hash calculation) Data used to create hash: %s\n", preparedData);
+        }
         return hashGenerator.getHash(preparedData);
     }
 }

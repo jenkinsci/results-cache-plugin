@@ -4,12 +4,14 @@
 
 package hudson.plugins.resultscache.util;
 
+import hudson.plugins.resultscache.model.BuildData;
+import hudson.EnvVars;
+import hudson.plugins.resultscache.model.BuildConfig;
 import org.apache.commons.lang.StringUtils;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import hudson.EnvVars;
-import hudson.plugins.resultscache.model.BuildData;
 
 /**
  * This class prepares a string from a BuildData instance. This string will be used to create a hash which identifies a Jenkins Job in the result cache.
@@ -21,18 +23,30 @@ public class BuildDataPreparer {
      * It only takes the job parameters present in the hashParameters comma separated list. If empty it takes all the parameters.
      * Output string format: <pre>&lt;jenkins master URL&gt;;&lt;jenkins job full name&gt;[&lt;parameter name&gt;=&lt;parameter value&gt;...]</pre>
      * @param buildData buildData instance
-     * @param hashParameters comma separated list to take from the job. If empty it takes all of them.
+     * @param buildConfig build configuration
      * @return a string from a BuildData instance.
      */
-    public String prepare(BuildData buildData, String hashParameters) {
+    public String prepare(BuildData buildData, BuildConfig buildConfig) {
         StringBuilder sb = new StringBuilder();
 
         // Job values
-        sb.append(StringUtils.isEmpty(buildData.getCiUrl()) ? "" : buildData.getCiUrl()).append(";")
-            .append(buildData.getFullJobName()).append(";");
+
+        // Machine name
+        if (!buildConfig.isExcludeMachineName()) {
+            sb.append(StringUtils.isEmpty(buildData.getCiUrl()) ? "" : buildData.getCiUrl()).append(";");
+        }
+
+        // Job name
+        sb.append(buildData.getFullJobName()).append(";");
 
         // Job parameters
-        List<String> hashableParameters = Stream.of(hashParameters.split(",")).map(String::trim).filter(s -> !StringUtils.isEmpty(s)).map(String::toUpperCase).collect(Collectors.toList());
+        List<String> hashableParameters = StringUtils.isEmpty(buildConfig.getHashParameters()) ?
+                                          Collections.EMPTY_LIST:
+                                          Stream.of(buildConfig.getHashParameters().split(","))
+                                                .map(String::trim)
+                                                .filter(s -> !StringUtils.isEmpty(s))
+                                                .map(String::toUpperCase)
+                                                .collect(Collectors.toList());
 
         sb.append("[");
         EnvVars parameters = buildData.getParameters();

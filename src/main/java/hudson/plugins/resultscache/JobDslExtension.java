@@ -13,11 +13,16 @@ import javaposse.jobdsl.plugin.DslExtensionMethod;
 public class JobDslExtension extends ContextExtensionPoint {
     @DslExtensionMethod(context = WrapperContext.class)
     public Object resultsCache() {
-        return new PluginBuildWrapper("");
+        return resultsCache(false, "");
     }
 
     @DslExtensionMethod(context = WrapperContext.class)
     public Object resultsCache(String hashableProperties) {
-        return new PluginBuildWrapper(hashableProperties);
+        return resultsCache(false, hashableProperties);
+    }
+
+    @DslExtensionMethod(context = WrapperContext.class)
+    public Object resultsCache(boolean excludeMachineName, String hashableProperties) {
+        return new ResultsCacheBuildWrapper(excludeMachineName, hashableProperties);
     }
 }
