@@ -17,6 +17,11 @@ public class JobDslExtension extends ContextExtensionPoint {
     }
 
     @DslExtensionMethod(context = WrapperContext.class)
+    public Object resultsCache(boolean excludeMachineName) {
+        return resultsCache(excludeMachineName, "");
+    }
+
+    @DslExtensionMethod(context = WrapperContext.class)
     public Object resultsCache(String hashableProperties) {
         return resultsCache(false, hashableProperties);
     }
