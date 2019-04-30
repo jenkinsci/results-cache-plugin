@@ -31,7 +31,7 @@ How to use
 
 Job DSL configuration
 ---------------------
-You can enable the results cache plugin in your jenkins jobs using Job DSL. You only need to configure it in the `wrappers` section of your dsl. Example;
+You can enable the results cache plugin in your jenkins jobs using Job DSL. You only need to configure it in the `wrappers` section of your dsl.
 
 ```
 resultsCache(boolean excludeMachineName, String hashableProperties)
