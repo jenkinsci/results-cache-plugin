@@ -34,10 +34,16 @@ Job DSL configuration
 You can enable the results cache plugin in your jenkins jobs using Job DSL. You only need to configure it in the `wrappers` section of your dsl. Example;
 
 ```
+resultsCache(boolean excludeMachineName, String hashableProperties)
+```
+
+Example:
+```
 wrappers {
-	resultsCache('PARAM_1,PARAM_2,...')
+    resultsCache(true, 'PARAM_1, PARAM_2')
 }
 ```
+
 
 ###### Note: like above if you provide an empty list that means all job parameters will be used.
 
