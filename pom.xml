@@ -25,7 +25,7 @@
 
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>results-cache</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <packaging>hpi</packaging>
 
     <properties>

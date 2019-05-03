@@ -16,7 +16,7 @@ You can find a reference implementation in [results cache service](https://githu
 
 Latest release
 --------------
-1.1.1
+1.1.2
 
 How to build
 ------------
