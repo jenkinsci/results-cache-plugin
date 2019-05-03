@@ -24,7 +24,7 @@
     </parent>
 
     <groupId>io.jenkins.plugins</groupId>
-    <artifactId>results-cache-plugin</artifactId>
+    <artifactId>results-cache</artifactId>
     <version>1.1.0</version>
     <packaging>hpi</packaging>
 
@@ -46,16 +46,12 @@
         </developer>
     </developers>
 
-    <!-- Assuming you want to host on @jenkinsci:
-    <url>https://wiki.jenkins.io/display/JENKINS/TODO+Plugin</url>
-    -->
-    <!--
+    <url>https://wiki.jenkins.io/display/JENKINS/Results+Cache+Plugin</url>
     <scm>
-      <connection>scm:git:ssh://github.com/jenkinsci/MYPLUGINNAME.git</connection>
-      <developerConnection>scm:git:ssh://git@github.com/jenkinsci/MYPLUGINNAME.git</developerConnection>
-      <url>https://github.com/jenkinsci/MYPLUGINNAME</url>
+      <connection>scm:git:ssh://github.com/jenkinsci/results-cache-plugin.git</connection>
+      <developerConnection>scm:git:ssh://git@github.com/jenkinsci/results-cache-plugin.git</developerConnection>
+      <url>https://github.com/jenkinsci/results-cache-plugin</url>
     </scm>
-    -->
 
     <repositories>
         <repository>
