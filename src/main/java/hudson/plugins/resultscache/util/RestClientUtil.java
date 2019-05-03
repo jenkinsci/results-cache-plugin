@@ -75,47 +75,8 @@ public class RestClientUtil {
     private HttpURLConnection createConnection(String urlStr) throws IOException {
         URL url = new URL(urlStr);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        if (url.getProtocol().equalsIgnoreCase("https")) {
-            disableSSLVerification(connection);
-        }
-
         connection.setConnectTimeout(connectionTimeout);
         connection.setReadTimeout(socketTimeout);
         return connection;
-    }
-
-    private void disableSSLVerification(HttpURLConnection conn) {
-        try {
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-
-            // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            ((HttpsURLConnection) conn).setSSLSocketFactory(sc.getSocketFactory());
-
-            // Create all-trusting host name verifier
-            HostnameVerifier allHostsValid = new HostnameVerifier() {
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            };
-
-            // Install the all-trusting host verifier
-            ((HttpsURLConnection) conn).setHostnameVerifier(allHostsValid);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
