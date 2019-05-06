@@ -1,3 +1,1 @@
-#!groovy
-pipeline {
-}
+buildPlugin()
