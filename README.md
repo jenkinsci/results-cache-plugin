@@ -67,7 +67,7 @@ wrappers {
 
 Latest release
 ==============
-1.1.2
+1.2.0
 
 How to build
 ============
@@ -75,7 +75,7 @@ How to build
 
 Version history
 ===============
-Version 1.1.2 (May 3, 2019)
+Version 1.2.0 (May 8, 2019)
 ---------------------------
 Initial release
 
