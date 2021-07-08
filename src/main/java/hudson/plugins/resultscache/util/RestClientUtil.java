@@ -6,8 +6,10 @@ package hudson.plugins.resultscache.util;
 
 import org.apache.commons.io.IOUtils;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -52,6 +54,31 @@ public class RestClientUtil {
     }
 
     /**
+     * Executes a HTTP JSON POST to the given url, with the provided json string
+     * @param urlStr URL to invoke
+     * @param jsonInputString JSON request body, as string
+     * @return TRUE if it worked
+     * @throws IOException there's a communication error
+     */
+    public boolean executeJsonPost(String urlStr, String jsonInputString) throws IOException {
+        HttpURLConnection connection = createConnection(urlStr);
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json; utf-8");
+        connection.setDoOutput(true);
+
+        try(OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+
+        try {
+            return connection.getResponseCode() == 200;
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    /**
      * Executes a HTTP GET to the given url
      * @param urlStr URL to invoke
      * @param defaultValue default value to return if the http response is not HTTP_OK
@@ -63,7 +90,7 @@ public class RestClientUtil {
 
         try {
             if (connection.getResponseCode() == 200) {
-                return IOUtils.toString(connection.getInputStream());
+                return IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
             } else {
                 return defaultValue;
             }

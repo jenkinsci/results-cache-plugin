@@ -6,6 +6,8 @@ package hudson.plugins.resultscache.util;
 
 import java.io.IOException;
 import hudson.model.Result;
+import hudson.plugins.resultscache.CachedResult;
+import org.json.JSONObject;
 
 /**
  * This class implements the communication with the Results Cache Service
@@ -26,27 +28,39 @@ public class CacheServerComm {
     }
 
     /**
-     * Searches a cached result from the cache. Returns NOT_BUILD if not found.
+     * Searches a cached result from the cache. Returns NOT_BUILD for result, and -1 for build_number, if not found.
      * @param hash job hash to search
      * @return the cached result
      * @throws IOException there's a communication problem with the cache service
      */
-    public Result getCachedResult(String hash) throws IOException {
-        return Result.fromString(restClient.executeGet(new StringBuilder(baseUrl).append("/job-results/").append(URLEncoder.encode(hash)).toString(), Result.NOT_BUILT.toString()));
+    public CachedResult getCachedResult(String hash) throws IOException {
+        String url = baseUrl + "/job-results/" + URLEncoder.encode(hash);
+        String defaultValue = "{\"result\": " + Result.NOT_BUILT.toString() + ", \"build_number\": -1}";
+
+        String response = restClient.executeGet(url, defaultValue);
+        JSONObject json = new JSONObject(response);
+        Result result = Result.fromString(json.getString("result"));
+        Number build_number = json.getNumber("build_number");
+
+        return new CachedResult(result, build_number);
     }
 
     /**
      * Adds or Updates a result in the cache
      * @param hash job hash to add/update
      * @param result job result. If null then NOT_BUILT
+     * @param build_number job number - allows reference to the run the result refers to. If null then -1
      * @return TRUE if it worked
      * @throws IOException there's a communication problem with the cache service
      */
-    public boolean postCachedResult(String hash, Result result) throws IOException {
+    public boolean postCachedResult(String hash, Result result, Number build_number) throws IOException {
         Result r = (null != result) ? result : Result.NOT_BUILT;
+        Number num = (build_number != null) ? build_number : -1;
 
-        return restClient.executePost(new StringBuilder(baseUrl).append("/job-results/").append(URLEncoder.encode(hash)).append("/")
-                .append(URLEncoder.encode(r.toString())).toString());
+        String url = baseUrl + "/job-results/" + URLEncoder.encode(hash);
+        String jsonInputString = "{\"result\": " + r + ", \"build_number\": " + num + "}";
+
+        return restClient.executeJsonPost(url, jsonInputString);
     }
 
     /**

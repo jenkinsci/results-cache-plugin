@@ -5,6 +5,7 @@
 package hudson.plugins.resultscache.util;
 
 import hudson.model.Result;
+import hudson.plugins.resultscache.CachedResult;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -28,11 +29,12 @@ public class CacheServerCommTest {
     @Test
     public void postAndGet() throws Exception {
         String id = UUID.randomUUID().toString();
-        uit.postCachedResult(id, Result.SUCCESS);
+        uit.postCachedResult(id, Result.SUCCESS, 5);
 
         Thread.sleep(1000);
 
-        Result result = uit.getCachedResult(id);
-        Assert.assertEquals(Result.SUCCESS, result);
+        CachedResult cachedResult = uit.getCachedResult(id);
+        Assert.assertEquals(Result.SUCCESS, cachedResult.result);
+        Assert.assertEquals(5, cachedResult.build_number);
     }
 }
