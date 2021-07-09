@@ -107,7 +107,7 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
         private void saveResultToCache(AbstractBuild build, TaskListener listener, String jobHash) {
             CacheServerComm cacheServer = new CacheServerComm(ResultsCacheHelper.getCacheServiceUrl(), ResultsCacheHelper.getTimeout());
             Result r = (null != build) ? build.getResult() : Result.NOT_BUILT;
-            Number num = (null != build) ? build.getNumber() : -1;
+            Integer num = (null != build) ? build.getNumber() : -1;
             LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: job number: %s :: hash: %s) %n", r, num, jobHash);
 
             try {

@@ -4,12 +4,18 @@
 
 package hudson.plugins.resultscache;
 
-import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
 import java.io.IOException;
 import java.util.Collections;
 
 import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.Executor;
+import hudson.model.ParametersAction;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.StringParameterValue;
+import hudson.model.TaskListener;
 import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.util.CacheServerComm;
 import hudson.plugins.resultscache.util.HashCalculator;

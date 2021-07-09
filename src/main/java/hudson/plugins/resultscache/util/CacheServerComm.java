@@ -40,22 +40,22 @@ public class CacheServerComm {
         String response = restClient.executeGet(url, defaultValue);
         JSONObject json = new JSONObject(response);
         Result result = Result.fromString(json.getString("result"));
-        Number build_number = json.getNumber("build_number");
+        Integer buildNumber = json.getInt("build_number");
 
-        return new CachedResult(result, build_number);
+        return new CachedResult(result, buildNumber);
     }
 
     /**
      * Adds or Updates a result in the cache
      * @param hash job hash to add/update
      * @param result job result. If null then NOT_BUILT
-     * @param build_number job number - allows reference to the run the result refers to. If null then -1
+     * @param buildNumber job number - allows reference to the run the result refers to. If null then -1
      * @return TRUE if it worked
      * @throws IOException there's a communication problem with the cache service
      */
-    public boolean postCachedResult(String hash, Result result, Number build_number) throws IOException {
+    public boolean postCachedResult(String hash, Result result, Integer buildNumber) throws IOException {
         Result r = (null != result) ? result : Result.NOT_BUILT;
-        Number num = (build_number != null) ? build_number : -1;
+        Integer num = (buildNumber != null) ? buildNumber : -1;
 
         String url = baseUrl + "/job-results/" + URLEncoder.encode(hash);
         String jsonInputString = "{\"result\": " + r + ", \"build_number\": " + num + "}";
