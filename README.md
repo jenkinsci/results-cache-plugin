@@ -6,8 +6,8 @@ It works using a complementary external Cache Service which has to implement the
 
 Cache Server API
 ----------------
-* GET /job-results/{hash}: Returns a cached result from its job hash. Returns 'NOT_BUILT' if the job hash is not found.
-* POST /job-results/{hash}/{result}: Adds a new result in the cache for the provided job hash
+* GET /job-results/{hash}: Returns a JSON with the cached result and build number from its job hash. Returns 'NOT_BUILT' and '-1' respectively, if the job hash is not found.
+* POST /job-results/{hash}/{JSON string with result and build number}: Adds a new result, and related build number, in the cache for the provided job hash
 * DELETE /job-results/clear: Removes all the cache values
 
 You can find a reference implementation in [results cache service](https://github.com/king/results-cache-service) or implement it on your own.
@@ -38,7 +38,7 @@ Job configuration
 -----------------
 You can enable a job to cache its result in the Cache Service. To do that you have to enable the option Enable Results Cache for this job in the Configure page of the job.
 
-The Cache Service will contain the latest result of every job using a hash value that identifies every execution of the job.
+The Cache Service will contain the latest result and build number of every job using a hash value that identifies every execution of the job.
 
 A hash value is calculated using the following data of the job execution:
 
