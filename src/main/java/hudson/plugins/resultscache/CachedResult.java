@@ -15,7 +15,7 @@ public class CachedResult implements Serializable {
     }
 
     public Result getCachedResult() { return result; }
-    public Number getBuildNumber() { return buildNumber; }
+    public Integer getBuildNumber() { return buildNumber; }
 
     public void setCachedResult(Result result) { this.result = result; }
     public void setBuildNumber(Integer buildNumber) { this.buildNumber = buildNumber; }
