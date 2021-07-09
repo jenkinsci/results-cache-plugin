@@ -34,7 +34,7 @@ public class CacheServerCommTest {
         Thread.sleep(1000);
 
         CachedResult cachedResult = uit.getCachedResult(id);
-        Assert.assertEquals(Result.SUCCESS, cachedResult.result);
-        Assert.assertEquals(5, cachedResult.build_number);
+        Assert.assertEquals(Result.SUCCESS, cachedResult.getCachedResult());
+        Assert.assertEquals(5, cachedResult.getBuildNumber());
     }
 }

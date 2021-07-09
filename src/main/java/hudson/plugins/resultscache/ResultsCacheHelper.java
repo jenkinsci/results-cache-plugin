@@ -8,7 +8,7 @@ import hudson.model.*;
 import org.apache.commons.lang.StringUtils;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Optional;
+
 import hudson.FilePath;
 import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.util.CacheServerComm;
@@ -29,25 +29,25 @@ public class ResultsCacheHelper {
             CacheServerComm cacheServer = new CacheServerComm(getCacheServiceUrl(), getTimeout());
             try {
                 cachedResult = cacheServer.getCachedResult(jobHash);
-                LoggerUtil.info(listener, "(Pre-Checkout) Cached result for this job (hash: %s) is %s; found on job number %s %n", jobHash, cachedResult.result.toString(), cachedResult.build_number.toString());
+                LoggerUtil.info(listener, "(Pre-Checkout) Cached result for this job (hash: %s) is %s; found on job number %s %n", jobHash, cachedResult.getCachedResult().toString(), cachedResult.getBuildNumber().toString());
             } catch (IOException e) {
                 LoggerUtil.warn(listener, "(Pre-Checkout) Unable to get cached result for this job (hash: %s). Exception: %s %n", jobHash, e.getMessage());
             }
 
             CachedResult finalCachedResult = cachedResult;
-            if (finalCachedResult.result.equals(Result.SUCCESS)) {
+            if (finalCachedResult.getCachedResult().equals(Result.SUCCESS)) {
                 Executor executor = build.getExecutor();
                 if (executor != null) {
                     if (executor.isActive()) {
                         if (build instanceof AbstractBuild) {
                             createWorkspace(((AbstractBuild)build).getWorkspace());
                         }
-                        ParametersAction pa = new ParametersAction(Collections.singletonList(new StringParameterValue("CACHED_RESULT_BUILD_NUM", finalCachedResult.build_number.toString())), Collections.singleton("CACHED_RESULT_BUILD_NUM"));
+                        ParametersAction pa = new ParametersAction(Collections.singletonList(new StringParameterValue("CACHED_RESULT_BUILD_NUM", finalCachedResult.getBuildNumber().toString())), Collections.singleton("CACHED_RESULT_BUILD_NUM"));
                         build.addAction(pa);
-                        executor.interrupt(finalCachedResult.result, new CauseOfInterruption() {
+                        executor.interrupt(finalCachedResult.getCachedResult(), new CauseOfInterruption() {
                             @Override
                             public String getShortDescription() {
-                                return String.format(Constants.LOG_LINE_HEADER + "[INFO] This job (hash: %s) was interrupted because a SUCCESS result is cached from job number %s %n", jobHash, finalCachedResult.build_number);
+                                return String.format(Constants.LOG_LINE_HEADER + "[INFO] This job (hash: %s) was interrupted because a SUCCESS result is cached from job number %s %n", jobHash, finalCachedResult.getBuildNumber());
                             }
                         });
                     }
