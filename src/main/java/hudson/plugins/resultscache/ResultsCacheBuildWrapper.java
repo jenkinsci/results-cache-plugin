@@ -107,10 +107,11 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
         private void saveResultToCache(AbstractBuild build, TaskListener listener, String jobHash) {
             CacheServerComm cacheServer = new CacheServerComm(ResultsCacheHelper.getCacheServiceUrl(), ResultsCacheHelper.getTimeout());
             Result r = (null != build) ? build.getResult() : Result.NOT_BUILT;
-            LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: hash: %s) %n", r, jobHash);
+            Integer num = (null != build) ? build.getNumber() : -1;
+            LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: job number: %s :: hash: %s) %n", r, num, jobHash);
 
             try {
-                cacheServer.postCachedResult(jobHash, r);
+                cacheServer.postCachedResult(jobHash, r, num);
                 LoggerUtil.info(listener, "(Update status: SUCCESS) Build result sent %n");
             } catch (IOException e) {
                 LoggerUtil.warn(listener, "(Update status: FAILURE) Unable to connect with cache server. Exception: %s %n", e.getMessage());
