@@ -2,7 +2,10 @@ package hudson.plugins.resultscache;
 
 import hudson.model.Result;
 
-public class CachedResult {
+import java.io.Serializable;
+
+public class CachedResult implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Result result;
     private Number build_number;
 
