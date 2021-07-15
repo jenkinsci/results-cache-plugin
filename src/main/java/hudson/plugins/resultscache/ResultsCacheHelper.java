@@ -24,9 +24,9 @@ import jenkins.model.CauseOfInterruption;
 
 public class ResultsCacheHelper {
 
-    private Run<?, ?> build;
-    private TaskListener listener;
-    private BuildConfig buildConfig;
+    private final Run<?, ?> build;
+    private final TaskListener listener;
+    private final BuildConfig buildConfig;
 
     public ResultsCacheHelper(Run<?, ?> build, TaskListener listener, BuildConfig buildConfig) {
         this.build = build;

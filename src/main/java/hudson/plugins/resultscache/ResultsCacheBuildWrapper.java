@@ -25,7 +25,7 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
 
     private boolean excludeMachineName;
     private String hashParameters;
-    private BuildConfig buildConfig;
+    private final BuildConfig buildConfig;
 
     @DataBoundConstructor
     public ResultsCacheBuildWrapper(boolean excludeMachineName, String hashParameters) {
