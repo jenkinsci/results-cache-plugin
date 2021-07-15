@@ -41,7 +41,7 @@ public class BuildDataPreparer {
 
         // Job parameters
         List<String> hashableParameters = StringUtils.isEmpty(buildConfig.getHashParameters()) ?
-                                          Collections.EMPTY_LIST:
+                                          Collections.emptyList():
                                           Stream.of(buildConfig.getHashParameters().split(","))
                                                 .map(String::trim)
                                                 .filter(s -> !StringUtils.isEmpty(s))
@@ -53,7 +53,7 @@ public class BuildDataPreparer {
         sb.append(
             parameters.entrySet().stream()
                 .filter(entry -> hashableParameters.isEmpty() || hashableParameters.contains(entry.getKey().toUpperCase()))
-                .map(entry -> new StringBuilder(entry.getKey()).append("=").append(entry.getValue()).toString())
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining(","))
         );
         sb.append("]");

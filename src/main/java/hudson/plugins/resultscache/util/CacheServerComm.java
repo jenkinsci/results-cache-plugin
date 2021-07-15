@@ -4,18 +4,23 @@
 
 package hudson.plugins.resultscache.util;
 
-import java.io.IOException;
 import hudson.model.Result;
-import hudson.plugins.resultscache.CachedResult;
+import hudson.plugins.resultscache.JobResult;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 /**
  * This class implements the communication with the Results Cache Service
  */
 public class CacheServerComm {
 
-    private String baseUrl;
-    private RestClientUtil restClient;
+    private static final String RESULT_KEY = "result";
+    private static final String BUILD_KEY = "build";
+    private static final String DEFAULT_RESPONSE_VALUE = createBodyStringFromJobResult(JobResult.EMPTY_RESULT);
+
+    private final String baseUrl;
+    private final RestClientUtil restClient;
 
     /**
      * Constructor
@@ -28,39 +33,28 @@ public class CacheServerComm {
     }
 
     /**
-     * Searches a cached result from the cache. Returns NOT_BUILD for result, and -1 for build_number, if not found.
+     * Searches a job result in the cache. Returns {@link JobResult#EMPTY_RESULT}, if not found.
      * @param hash job hash to search
-     * @return the cached result
+     * @return the cached job result
      * @throws IOException there's a communication problem with the cache service
      */
-    public CachedResult getCachedResult(String hash) throws IOException {
-        String url = baseUrl + "/job-results/" + URLEncoder.encode(hash);
-        String defaultValue = "{\"result\": " + Result.NOT_BUILT.toString() + ", \"build_number\": -1}";
-
-        String response = restClient.executeGet(url, defaultValue);
-        JSONObject json = new JSONObject(response);
-        Result result = Result.fromString(json.getString("result"));
-        Integer buildNumber = json.getInt("build_number");
-
-        return new CachedResult(result, buildNumber);
+    public JobResult getCachedJobResult(String hash) throws IOException {
+        String url = createRequestUrl(hash);
+        String response = restClient.executeGet(url, DEFAULT_RESPONSE_VALUE);
+        return createJobResultFromResponse(response);
     }
 
     /**
-     * Adds or Updates a result in the cache
+     * Adds or Updates a job result into the cache
      * @param hash job hash to add/update
-     * @param result job result. If null then NOT_BUILT
-     * @param buildNumber job number - allows reference to the run the result refers to. If null then -1
+     * @param jobResult job result. If null then {@link JobResult#EMPTY_RESULT}
      * @return TRUE if it worked
      * @throws IOException there's a communication problem with the cache service
      */
-    public boolean postCachedResult(String hash, Result result, Integer buildNumber) throws IOException {
-        Result r = (null != result) ? result : Result.NOT_BUILT;
-        Integer num = (buildNumber != null) ? buildNumber : -1;
-
-        String url = baseUrl + "/job-results/" + URLEncoder.encode(hash);
-        String jsonInputString = "{\"result\": " + r + ", \"build_number\": " + num + "}";
-
-        return restClient.executeJsonPost(url, jsonInputString);
+    public boolean postJobResult(String hash, JobResult jobResult) throws IOException {
+        String url = createRequestUrl(hash);
+        String body = createBodyStringFromJobResult(jobResult);
+        return restClient.executePost(url, body);
     }
 
     /**
@@ -70,5 +64,38 @@ public class CacheServerComm {
      */
     private String getServiceBaseUrl(String url) {
         return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    }
+
+    /**
+     * Returns the request url using the build hash
+     * @param hash build hash
+     * @return request url
+     */
+    private String createRequestUrl(String hash) {
+        return String.format("%s/job-results/v2/%s", baseUrl, URLEncoder.encode(hash));
+    }
+
+    /**
+     * Creates a Job Result object from a response body string
+     * @param response response body string
+     * @return job result
+     */
+    private JobResult createJobResultFromResponse(String response) {
+        JSONObject json = new JSONObject(response);
+        Result result = Result.fromString(json.getString(RESULT_KEY));
+        Integer build = json.has(BUILD_KEY) ? json.getInt(BUILD_KEY) : null;
+        return new JobResult(result, build);
+    }
+
+    /**
+     * Returns the json string from a Job Result
+     * @param jobResult job result
+     * @return json string
+     */
+    private static String createBodyStringFromJobResult(JobResult jobResult) {
+        return new JSONObject()
+                .put(RESULT_KEY, jobResult.getResult())
+                .put(BUILD_KEY, jobResult.getBuild())
+                .toString();
     }
 }

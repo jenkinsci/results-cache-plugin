@@ -28,9 +28,9 @@ public class BuildDataBuilder {
      * @param build Jenkins Job AbstractBuild instance
      * @return BuildData instance from a Jenkins Job AbstractBuild instance
      */
-    public BuildData build(Run build) {
+    public BuildData build(Run<?, ?> build) {
         BuildData buildData = new BuildData();
-        buildData.setCiUrl(Jenkins.getInstance().getRootUrl());
+        buildData.setCiUrl(Jenkins.get().getRootUrl());
         buildData.setFullJobName(build.getParent().getFullName());
 
         ParametersAction paramsAction = build.getAction(ParametersAction.class);

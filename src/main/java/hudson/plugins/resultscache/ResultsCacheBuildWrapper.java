@@ -12,7 +12,6 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.resultscache.model.BuildConfig;
@@ -53,7 +52,7 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
 
     @Override
     public void preCheckout(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
-        ResultsCacheHelper.checkCacheOrExecute(build, listener, buildConfig);
+        new ResultsCacheHelper(build, listener, buildConfig).checkCacheOrExecute();
     }
 
     @Override
@@ -104,17 +103,17 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
                     .ifPresent(e -> saveResultToCache(build, listener, ((MyEnvironment) e).getJobHash()));
         }
 
-        private void saveResultToCache(AbstractBuild build, TaskListener listener, String jobHash) {
+        private void saveResultToCache(AbstractBuild<?, ?> build, TaskListener listener, String jobHash) {
             CacheServerComm cacheServer = new CacheServerComm(ResultsCacheHelper.getCacheServiceUrl(), ResultsCacheHelper.getTimeout());
-            Result r = (null != build) ? build.getResult() : Result.NOT_BUILT;
-            Integer num = (null != build) ? build.getNumber() : -1;
-            LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: job number: %s :: hash: %s) %n", r, num, jobHash);
+            JobResult jobResult = new JobResult(build.getResult(), build.getNumber());
+            LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: build: %s :: hash: %s)%n",
+                    jobResult.getResult(), jobResult.getBuild(), jobHash);
 
             try {
-                cacheServer.postCachedResult(jobHash, r, num);
-                LoggerUtil.info(listener, "(Update status: SUCCESS) Build result sent %n");
+                cacheServer.postJobResult(jobHash, jobResult);
+                LoggerUtil.info(listener, "(Update status: SUCCESS) Build result sent%n");
             } catch (IOException e) {
-                LoggerUtil.warn(listener, "(Update status: FAILURE) Unable to connect with cache server. Exception: %s %n", e.getMessage());
+                LoggerUtil.warn(listener, "(Update status: FAILURE) Unable to connect with cache server. Exception: %s%n", e.getMessage());
             }
         }
     }

@@ -14,9 +14,9 @@ import hudson.model.TaskListener;
  */
 public class HashCalculator {
 
-    private BuildDataBuilder dataBuilder;
-    private BuildDataPreparer dataPreparer;
-    private HashGenerator hashGenerator;
+    private final BuildDataBuilder dataBuilder;
+    private final BuildDataPreparer dataPreparer;
+    private final HashGenerator hashGenerator;
 
     public HashCalculator() {
         this(new BuildDataBuilder(), new BuildDataPreparer(), new HashGenerator());
@@ -34,7 +34,7 @@ public class HashCalculator {
      * @param buildConfig step configuration
      * @return calculated job hash
      */
-    public String calculate(Run build, BuildConfig buildConfig) {
+    public String calculate(Run<?, ?> build, BuildConfig buildConfig) {
         return calculate(build, buildConfig, null);
     }
 
@@ -45,7 +45,7 @@ public class HashCalculator {
      * @param listener task listener to write log traces
      * @return calculated job hash
      */
-    public String calculate(Run build, BuildConfig buildConfig, TaskListener listener) {
+    public String calculate(Run<?, ?> build, BuildConfig buildConfig, TaskListener listener) {
         BuildData data = dataBuilder.build(build);
         String preparedData = dataPreparer.prepare(data, buildConfig);
         if (listener != null) {
