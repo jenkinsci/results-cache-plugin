@@ -16,7 +16,7 @@ public class JobResult implements Serializable {
 
     public JobResult(Result result, Integer build) {
         this.result = result == null ? Result.NOT_BUILT : result;
-        this.build = build == null ? -1 : build;
+        this.build = build == null ? Integer.valueOf(-1) : build;
     }
 
     public Result getResult() { return result; }
