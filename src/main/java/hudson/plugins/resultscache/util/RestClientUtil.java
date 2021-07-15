@@ -5,26 +5,20 @@
 package hudson.plugins.resultscache.util;
 
 import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 /**
  * REST client utility
  */
 public class RestClientUtil {
 
-    private int connectionTimeout;
-    private int socketTimeout;
+    private final int connectionTimeout;
+    private final int socketTimeout;
 
     /**
      * Constructor
@@ -37,37 +31,20 @@ public class RestClientUtil {
     }
 
     /**
-     * Executes a HTTP POST to the given url
-     * @param urlStr URL to invoke
-     * @return TRUE if it worked
-     * @throws IOException there's a communication error
-     */
-    public boolean executePost(String urlStr) throws IOException {
-        HttpURLConnection connection = createConnection(urlStr);
-        connection.setRequestMethod("POST");
-
-        try {
-            return connection.getResponseCode() == 200;
-        } finally {
-            connection.disconnect();
-        }
-    }
-
-    /**
      * Executes a HTTP JSON POST to the given url, with the provided json string
      * @param urlStr URL to invoke
-     * @param jsonInputString JSON request body, as string
+     * @param body JSON request body, as string
      * @return TRUE if it worked
      * @throws IOException there's a communication error
      */
-    public boolean executeJsonPost(String urlStr, String jsonInputString) throws IOException {
+    public boolean executePost(String urlStr, String body) throws IOException {
         HttpURLConnection connection = createConnection(urlStr);
         connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "application/json; utf-8");
+        connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoOutput(true);
 
-        try(OutputStream os = connection.getOutputStream()) {
-            byte[] input = jsonInputString.getBytes("utf-8");
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = body.getBytes(StandardCharsets.UTF_8);
             os.write(input, 0, input.length);
         }
 

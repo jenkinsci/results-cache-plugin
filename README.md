@@ -6,9 +6,12 @@ It works using a complementary external Cache Service which has to implement the
 
 Cache Server API
 ----------------
-* GET /job-results/{hash}: Returns a JSON with the cached result and build number from its job hash. Returns 'NOT_BUILT' and '-1' respectively, if the job hash is not found.
-* POST /job-results/{hash}/{JSON string with result and build number}: Adds a new result, and related build number, in the cache for the provided job hash
-* DELETE /job-results/clear: Removes all the cache values
+* `GET /job-results/v2/{hash}`: Returns a JSON with the cached result and build number from its job hash. Returns 'NOT_BUILT' and '-1' respectively, if the job hash is not found.
+* `POST /job-results/v2/{hash}`: Adds a new result, and related build number, in the cache for the provided job hash
+  - Body:
+    - Content-type: `application/json`
+    - Example: `{"result": "SUCCESS", "build": 10}`
+* `DELETE /job-results/clear`: Removes all the cache values
 
 You can find a reference implementation in [results cache service](https://github.com/king/results-cache-service) or implement it on your own.
 
@@ -16,7 +19,7 @@ Requirements
 ============
 Jenkins
 -------
-Jenkins [version 2.19](https://jenkins.io/changelog#v2.19) or newer is required.
+Jenkins [version 2.190.3](https://jenkins.io/changelog#v2.190.3) or newer is required.
 
 Setup
 =====
@@ -67,7 +70,7 @@ wrappers {
 
 Latest release
 ==============
-1.3.0
+2.0.0
 
 How to build
 ============
@@ -75,14 +78,16 @@ How to build
 
 Version history
 ===============
-Version 1.3.0 (July 9, 2021)
+Version 2.0.0 (July 15, 2021)
 ---------------------------
 * Every cached result now also contains build number
 * New `CACHED_RESULT_BUILD_NUM` environment variable created for runs where cached result returned successful
+* Only compatible with [results cache service v1.1.0](https://github.com/king/results-cache-service/tree/1.1.0)
 
 Version 1.2.0 (May 8, 2019)
 ---------------------------
 * Initial release
+* Compatible with [results cache service v1.0.1](https://github.com/king/results-cache-service/tree/1.0.1) and above
 
 Contact us!
 ===========
@@ -90,5 +95,8 @@ The original King authors of this code:
 
  - Francisco Javier García Orduña (francisco.orduna@king.com)
  - David Campos Valls (david.campos@king.com)
+
+Contributors:
+ - Nicky King (nicky.king@king.com)
 
 With any questions or suggestions feel free to reach out to us an email anytime!

@@ -9,10 +9,9 @@ import java.io.UnsupportedEncodingException;
 /**
  * URL Encoder utility
  */
-public class URLEncoder {
+public final class URLEncoder {
 
-    protected URLEncoder() {
-        throw new IllegalAccessError("Utility class");
+    private URLEncoder() {
     }
 
     /**

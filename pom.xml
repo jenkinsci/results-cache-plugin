@@ -5,9 +5,22 @@
     License: Apache 2.0, https://raw.githubusercontent.com/jenkinsci/results-cache-plugin/master/LICENSE-APACHE
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>4.16</version>
+        <relativePath />
+    </parent>
+
+    <groupId>com.king.jenkins.plugins</groupId>
+    <artifactId>results-cache</artifactId>
+    <packaging>hpi</packaging>
+    <version>${revision}${changelist}</version>
     <name>Results Cache Plugin</name>
     <description>This plugins enables a jobs results cache in order to avoid repeated successful executions</description>
-    <modelVersion>4.0.0</modelVersion>
+    <url>https://github.com/jenkinsci/results-cache-plugin</url>
+
     <licenses>
         <license>
             <name>Apache 2.0</name>
@@ -15,22 +28,44 @@
         </license>
     </licenses>
 
-    <parent>
-        <groupId>org.jenkins-ci.plugins</groupId>
-        <artifactId>plugin</artifactId>
-        <version>2.19</version>
-        <relativePath />
-    </parent>
-
-    <groupId>com.king.jenkins.plugins</groupId>
-    <artifactId>results-cache</artifactId>
-    <version>1.3.1-SNAPSHOT</version>
-    <packaging>hpi</packaging>
-
     <properties>
-        <jenkins.version>2.19.4</jenkins.version>
+        <revision>2.0.0</revision>
+        <changelist>-SNAPSHOT</changelist>
+        <jenkins.version>2.190.3</jenkins.version>
         <java.level>8</java.level>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>1.11</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>job-dsl</artifactId>
+            <version>1.71</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.4.12</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version>
+        </dependency>
+    </dependencies>
+
+    <scm>
+        <connection>scm:git:ssh://github.com/jenkinsci/results-cache-plugin.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/results-cache-plugin.git</developerConnection>
+        <url>https://github.com/jenkinsci/results-cache-plugin</url>
+        <tag>${scmTag}</tag>
+    </scm>
 
     <developers>
         <developer>
@@ -44,14 +79,6 @@
             <email>david.campos@king.com</email>
         </developer>
     </developers>
-
-    <url>https://wiki.jenkins.io/display/JENKINS/Results+Cache+Plugin</url>
-    <scm>
-      <connection>scm:git:ssh://github.com/jenkinsci/results-cache-plugin.git</connection>
-      <developerConnection>scm:git:ssh://git@github.com/jenkinsci/results-cache-plugin.git</developerConnection>
-      <url>https://github.com/jenkinsci/results-cache-plugin</url>
-      <tag>HEAD</tag>
-  </scm>
 
     <repositories>
         <repository>
@@ -67,38 +94,7 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <dependencies>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>job-dsl</artifactId>
-            <version>1.48</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20210307</version>
-        </dependency>
-    </dependencies>
-
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <!-- Keep changes in the local repo, push will be done afterwards -->
-                    <pushChanges>false</pushChanges>
-                    <localCheckout>true</localCheckout>
-                    <tagNameFormat>@{project.version}</tagNameFormat>
-                </configuration>
-            </plugin>
-        </plugins>
+        <defaultGoal>clean hpi:run</defaultGoal>
     </build>
 </project>
