@@ -4,10 +4,14 @@
 
 package hudson.plugins.resultscache.model;
 
+import java.io.Serializable;
+
 /**
  * Represents a configuration for this plugin in a jenkins job.
  */
-public class BuildConfig {
+public class BuildConfig implements Serializable {
+
+    private static final long serialVersionUID = 2725731030223676965L;
 
     private boolean excludeMachineName;
     private String hashParameters;

@@ -6,10 +6,14 @@ package hudson.plugins.resultscache.model;
 
 import hudson.EnvVars;
 
+import java.io.Serializable;
+
 /**
  * Represents a jenkins job data. It is used to create a hash to identify a jenkins job in the results cache
  */
-public class BuildData {
+public class BuildData implements Serializable {
+
+    private static final long serialVersionUID = 2502527524492021146L;
 
     private String ciUrl;
 

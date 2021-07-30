@@ -70,7 +70,7 @@ wrappers {
 
 Latest release
 ==============
-2.0.1
+2.0.2
 
 How to build
 ============
@@ -78,6 +78,10 @@ How to build
 
 Version history
 ===============
+Version 2.0.2 (July 30, 2021)
+---------------------------
+* Fix: effectively add the environment variable `CACHED_RESULT_BUILD_NUM` to the build
+
 Version 2.0.1 (July 15, 2021)
 ---------------------------
 * Every cached result now also contains build number

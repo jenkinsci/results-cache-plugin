@@ -8,25 +8,28 @@ import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Executor;
 import hudson.model.Result;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.util.CacheServerComm;
 import hudson.plugins.resultscache.util.HashCalculator;
 import hudson.plugins.resultscache.util.LoggerUtil;
-import jenkins.model.CauseOfInterruption;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.envinject.EnvInjectPluginAction;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 
-public class ResultsCacheHelper {
+public class ResultsCacheHelper implements Serializable {
+
+    private static final long serialVersionUID = 2307363177912459051L;
 
     public static final String CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME = "CACHED_RESULT_BUILD_NUM";
-    private final Run<?, ?> build;
+    private final transient AbstractBuild<?, ?> build;
     private final TaskListener listener;
     private final BuildConfig buildConfig;
 
-    public ResultsCacheHelper(Run<?, ?> build, TaskListener listener, BuildConfig buildConfig) {
+    public ResultsCacheHelper(AbstractBuild<?, ?> build, TaskListener listener, BuildConfig buildConfig) {
         this.build = build;
         this.listener = listener;
         this.buildConfig = buildConfig;
@@ -65,8 +68,6 @@ public class ResultsCacheHelper {
      * Process the Job Result obtained from the cache on the current build
      * @param jobHash job hash (for logging purposes)
      * @param jobResult job result
-     * @throws IOException IOException
-     * @throws InterruptedException InterruptedException
      */
     private void processJobResult(String jobHash, JobResult jobResult) throws IOException, InterruptedException {
         final Result result = jobResult.getResult();
@@ -74,16 +75,15 @@ public class ResultsCacheHelper {
         if (Result.SUCCESS.equals(result)) {
             Executor executor = build.getExecutor();
             if (executor != null && executor.isActive()) {
-                if (build instanceof AbstractBuild) {
-                    createWorkspace(((AbstractBuild<?, ?>) build).getWorkspace());
-                }
-                build.getEnvironment(listener).put(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME, buildNum.toString());
-                executor.interrupt(result, new CauseOfInterruption() {
-                    @Override
-                    public String getShortDescription() {
-                        return String.format(Constants.LOG_LINE_HEADER + "[INFO] This job (hash: %s) was interrupted because a SUCCESS result is cached from build number %s%n", jobHash, buildNum);
-                    }
-                });
+                createWorkspace(build.getWorkspace());
+                Map<String, String> buildVariables = build.getBuildVariables();
+                buildVariables.put(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME, buildNum.toString());
+
+                EnvInjectPluginAction envInjectAction = build.getAction(EnvInjectPluginAction.class);
+                envInjectAction.overrideAll(buildVariables);
+                build.addAction(envInjectAction);
+
+                executor.interrupt(result, new PluginCauseOfInterruption(jobHash, buildNum));
             }
         }
     }
