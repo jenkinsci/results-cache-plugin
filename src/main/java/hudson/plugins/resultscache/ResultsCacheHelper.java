@@ -4,26 +4,24 @@
 
 package hudson.plugins.resultscache;
 
-import org.apache.commons.lang.StringUtils;
-import java.io.IOException;
-import java.util.Collections;
-
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Executor;
-import hudson.model.ParametersAction;
 import hudson.model.Result;
 import hudson.model.Run;
-import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
 import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.util.CacheServerComm;
 import hudson.plugins.resultscache.util.HashCalculator;
 import hudson.plugins.resultscache.util.LoggerUtil;
 import jenkins.model.CauseOfInterruption;
+import org.apache.commons.lang.StringUtils;
+
+import java.io.IOException;
 
 public class ResultsCacheHelper {
 
+    public static final String CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME = "CACHED_RESULT_BUILD_NUM";
     private final Run<?, ?> build;
     private final TaskListener listener;
     private final BuildConfig buildConfig;
@@ -48,7 +46,7 @@ public class ResultsCacheHelper {
 
     /**
      * Retrieves a Job Result from the Cache Server
-     * @param jobHash job hash to retrive from the cache server
+     * @param jobHash job hash to retrieve from the cache server
      * @return found Job Result or {@link JobResult#EMPTY_RESULT} otherwise
      */
     private JobResult getJobResultFromCacheServer(String jobHash) {
@@ -67,8 +65,8 @@ public class ResultsCacheHelper {
      * Process the Job Result obtained from the cache on the current build
      * @param jobHash job hash (for logging purposes)
      * @param jobResult job result
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws IOException IOException
+     * @throws InterruptedException InterruptedException
      */
     private void processJobResult(String jobHash, JobResult jobResult) throws IOException, InterruptedException {
         final Result result = jobResult.getResult();
@@ -79,8 +77,7 @@ public class ResultsCacheHelper {
                 if (build instanceof AbstractBuild) {
                     createWorkspace(((AbstractBuild<?, ?>) build).getWorkspace());
                 }
-                ParametersAction pa = new ParametersAction(Collections.singletonList(new StringParameterValue("CACHED_RESULT_BUILD_NUM", buildNum.toString())), Collections.singleton("CACHED_RESULT_BUILD_NUM"));
-                build.addAction(pa);
+                build.getEnvironment(listener).put(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME, buildNum.toString());
                 executor.interrupt(result, new CauseOfInterruption() {
                     @Override
                     public String getShortDescription() {
