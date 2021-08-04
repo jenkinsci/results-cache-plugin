@@ -67,8 +67,8 @@ public class PluginConfiguration extends GlobalConfiguration {
     public FormValidation doCheckTimeout(@QueryParameter String value) {
         if (!StringUtils.isEmpty(value)) {
             try {
-                int timeout = Integer.parseInt(value);
-                if (timeout < 0) {
+                int tout = Integer.parseInt(value);
+                if (tout < 0) {
                     return FormValidation.error("Please specify a positive number.");
                 }
             } catch (NumberFormatException e) {

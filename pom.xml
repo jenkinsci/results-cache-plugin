@@ -16,7 +16,7 @@
     <groupId>com.king.jenkins.plugins</groupId>
     <artifactId>results-cache</artifactId>
     <packaging>hpi</packaging>
-    <version>2.0.2-SNAPSHOT</version>
+    <version>${revision}${changelist}</version>
     <name>Results Cache Plugin</name>
     <description>This plugins enables a jobs results cache in order to avoid repeated successful executions</description>
     <url>https://github.com/jenkinsci/results-cache-plugin</url>
@@ -29,7 +29,7 @@
     </licenses>
 
     <properties>
-        <revision>2.0.1</revision>
+        <revision>2.0.2</revision>
         <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.190.3</jenkins.version>
         <java.level>8</java.level>
@@ -45,6 +45,12 @@
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>job-dsl</artifactId>
             <version>1.71</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>envinject</artifactId>
+            <version>2.1.6</version>
             <optional>true</optional>
         </dependency>
         <dependency>

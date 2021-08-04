@@ -4,31 +4,32 @@
 
 package hudson.plugins.resultscache;
 
-import org.apache.commons.lang.StringUtils;
-import java.io.IOException;
-import java.util.Collections;
-
 import hudson.FilePath;
 import hudson.model.AbstractBuild;
 import hudson.model.Executor;
-import hudson.model.ParametersAction;
 import hudson.model.Result;
-import hudson.model.Run;
-import hudson.model.StringParameterValue;
 import hudson.model.TaskListener;
 import hudson.plugins.resultscache.model.BuildConfig;
 import hudson.plugins.resultscache.util.CacheServerComm;
 import hudson.plugins.resultscache.util.HashCalculator;
 import hudson.plugins.resultscache.util.LoggerUtil;
-import jenkins.model.CauseOfInterruption;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.envinject.EnvInjectPluginAction;
 
-public class ResultsCacheHelper {
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 
-    private final Run<?, ?> build;
+public class ResultsCacheHelper implements Serializable {
+
+    private static final long serialVersionUID = 2307363177912459051L;
+
+    public static final String CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME = "CACHED_RESULT_BUILD_NUM";
+    private final transient AbstractBuild<?, ?> build;
     private final TaskListener listener;
     private final BuildConfig buildConfig;
 
-    public ResultsCacheHelper(Run<?, ?> build, TaskListener listener, BuildConfig buildConfig) {
+    public ResultsCacheHelper(AbstractBuild<?, ?> build, TaskListener listener, BuildConfig buildConfig) {
         this.build = build;
         this.listener = listener;
         this.buildConfig = buildConfig;
@@ -41,14 +42,14 @@ public class ResultsCacheHelper {
             String jobHash = new HashCalculator().calculate(build, buildConfig, listener);
             LoggerUtil.info(listener, "(Pre-Checkout) Checking cached result for this job (hash: %s) %n", jobHash);
 
-            JobResult jobResult = getJobResultFromCacheServer(jobHash);
-            processJobResult(jobHash, jobResult);
+            JobResult cachedJobResult = getJobResultFromCacheServer(jobHash);
+            processCachedJobResult(jobHash, cachedJobResult);
         }
     }
 
     /**
      * Retrieves a Job Result from the Cache Server
-     * @param jobHash job hash to retrive from the cache server
+     * @param jobHash job hash to retrieve from the cache server
      * @return found Job Result or {@link JobResult#EMPTY_RESULT} otherwise
      */
     private JobResult getJobResultFromCacheServer(String jobHash) {
@@ -66,27 +67,23 @@ public class ResultsCacheHelper {
     /**
      * Process the Job Result obtained from the cache on the current build
      * @param jobHash job hash (for logging purposes)
-     * @param jobResult job result
-     * @throws IOException
-     * @throws InterruptedException
+     * @param cachedJobResult job result from the cache
      */
-    private void processJobResult(String jobHash, JobResult jobResult) throws IOException, InterruptedException {
-        final Result result = jobResult.getResult();
-        final Integer buildNum = jobResult.getBuild();
-        if (Result.SUCCESS.equals(result)) {
+    private void processCachedJobResult(String jobHash, JobResult cachedJobResult) throws IOException, InterruptedException {
+        final Result cachedResult = cachedJobResult.getResult();
+        if (Result.SUCCESS.equals(cachedResult)) {
             Executor executor = build.getExecutor();
             if (executor != null && executor.isActive()) {
-                if (build instanceof AbstractBuild) {
-                    createWorkspace(((AbstractBuild<?, ?>) build).getWorkspace());
-                }
-                ParametersAction pa = new ParametersAction(Collections.singletonList(new StringParameterValue("CACHED_RESULT_BUILD_NUM", buildNum.toString())), Collections.singleton("CACHED_RESULT_BUILD_NUM"));
-                build.addAction(pa);
-                executor.interrupt(result, new CauseOfInterruption() {
-                    @Override
-                    public String getShortDescription() {
-                        return String.format(Constants.LOG_LINE_HEADER + "[INFO] This job (hash: %s) was interrupted because a SUCCESS result is cached from build number %s%n", jobHash, buildNum);
-                    }
-                });
+                final Integer buildNum = cachedJobResult.getBuild();
+                createWorkspace(build.getWorkspace());
+                Map<String, String> buildVariables = build.getBuildVariables();
+                buildVariables.put(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME, buildNum.toString());
+
+                EnvInjectPluginAction envInjectAction = build.getAction(EnvInjectPluginAction.class);
+                envInjectAction.overrideAll(buildVariables);
+                build.addAction(envInjectAction);
+
+                executor.interrupt(cachedResult, new PluginCauseOfInterruption(jobHash, buildNum));
             }
         }
     }

@@ -4,14 +4,13 @@
 
 package hudson.plugins.resultscache;
 
-import org.kohsuke.stapler.DataBoundConstructor;
-import java.io.IOException;
-import javax.annotation.Nonnull;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.resultscache.model.BuildConfig;
@@ -20,6 +19,12 @@ import hudson.plugins.resultscache.util.HashCalculator;
 import hudson.plugins.resultscache.util.LoggerUtil;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import javax.annotation.Nonnull;
+import java.io.IOException;
+
+import static hudson.plugins.resultscache.ResultsCacheHelper.CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME;
 
 public class ResultsCacheBuildWrapper extends BuildWrapper {
 
@@ -62,7 +67,7 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
     }
 
     private class MyEnvironment extends BuildWrapper.Environment {
-        private String jobHash;
+        private final String jobHash;
 
         public MyEnvironment(String jobHash) {
             this.jobHash = jobHash;
@@ -86,6 +91,7 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
             return true;
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Enable " + Constants.DISPLAY_NAME + " for this job";
@@ -93,10 +99,10 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
     }
 
     @Extension
-    public static class RunListenerImpl extends RunListener<AbstractBuild> {
+    public static class RunListenerImpl extends RunListener<AbstractBuild<?, ?>> {
 
         @Override
-        public void onCompleted(AbstractBuild build, @Nonnull TaskListener listener) {
+        public void onCompleted(AbstractBuild<?, ?> build, @Nonnull TaskListener listener) {
             build.getEnvironments().stream()
                     .filter(e -> e.getClass().getName().startsWith(ResultsCacheBuildWrapper.class.getName()))
                     .findFirst()
@@ -104,12 +110,32 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
         }
 
         private void saveResultToCache(AbstractBuild<?, ?> build, TaskListener listener, String jobHash) {
-            CacheServerComm cacheServer = new CacheServerComm(ResultsCacheHelper.getCacheServiceUrl(), ResultsCacheHelper.getTimeout());
-            JobResult jobResult = new JobResult(build.getResult(), build.getNumber());
-            LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: build: %s :: hash: %s)%n",
-                    jobResult.getResult(), jobResult.getBuild(), jobHash);
-
             try {
+                int buildNum = calculateBuildNumber(build, listener);
+                JobResult jobResult = new JobResult(build.getResult(), buildNum);
+                postResultToCache(listener, jobHash, jobResult);
+            } catch (IOException e) {
+                LoggerUtil.info(listener, "Unable to get Environment%n");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        private int calculateBuildNumber(AbstractBuild<?, ?> build, TaskListener listener) throws IOException, InterruptedException {
+            if (build.getResult() == Result.SUCCESS) {
+                EnvVars environment = build.getEnvironment(listener);
+                return environment.containsKey(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME) ?
+                        Integer.parseInt(environment.get(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME)) :
+                        build.getNumber();
+            }
+            return build.getNumber();
+        }
+
+        private void postResultToCache(TaskListener listener, String jobHash, JobResult jobResult) {
+            CacheServerComm cacheServer = new CacheServerComm(ResultsCacheHelper.getCacheServiceUrl(), ResultsCacheHelper.getTimeout());
+            try {
+                LoggerUtil.info(listener, "(Post Build) Sending build result for this job (result: %s :: build: %s :: hash: %s)%n",
+                        jobResult.getResult(), jobResult.getBuild(), jobHash);
                 cacheServer.postJobResult(jobHash, jobResult);
                 LoggerUtil.info(listener, "(Update status: SUCCESS) Build result sent%n");
             } catch (IOException e) {

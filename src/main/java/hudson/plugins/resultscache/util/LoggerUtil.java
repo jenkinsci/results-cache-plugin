@@ -10,7 +10,11 @@ import hudson.plugins.resultscache.Constants;
 /**
  * Logger Util utility
  */
-public class LoggerUtil {
+public final class LoggerUtil {
+
+    private LoggerUtil() {
+        throw new IllegalStateException("Utility class.");
+    }
 
     /**
      * Writes an info log trace
