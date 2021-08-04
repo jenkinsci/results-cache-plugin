@@ -42,8 +42,8 @@ public class ResultsCacheHelper implements Serializable {
             String jobHash = new HashCalculator().calculate(build, buildConfig, listener);
             LoggerUtil.info(listener, "(Pre-Checkout) Checking cached result for this job (hash: %s) %n", jobHash);
 
-            JobResult jobResult = getJobResultFromCacheServer(jobHash);
-            processJobResult(jobHash, jobResult);
+            JobResult cachedJobResult = getJobResultFromCacheServer(jobHash);
+            processCachedJobResult(jobHash, cachedJobResult);
         }
     }
 
@@ -67,14 +67,14 @@ public class ResultsCacheHelper implements Serializable {
     /**
      * Process the Job Result obtained from the cache on the current build
      * @param jobHash job hash (for logging purposes)
-     * @param jobResult job result
+     * @param cachedJobResult job result from the cache
      */
-    private void processJobResult(String jobHash, JobResult jobResult) throws IOException, InterruptedException {
-        final Result result = jobResult.getResult();
-        final Integer buildNum = jobResult.getBuild();
-        if (Result.SUCCESS.equals(result)) {
+    private void processCachedJobResult(String jobHash, JobResult cachedJobResult) throws IOException, InterruptedException {
+        final Result cachedResult = cachedJobResult.getResult();
+        if (Result.SUCCESS.equals(cachedResult)) {
             Executor executor = build.getExecutor();
             if (executor != null && executor.isActive()) {
+                final Integer buildNum = cachedJobResult.getBuild();
                 createWorkspace(build.getWorkspace());
                 Map<String, String> buildVariables = build.getBuildVariables();
                 buildVariables.put(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME, buildNum.toString());
@@ -83,7 +83,7 @@ public class ResultsCacheHelper implements Serializable {
                 envInjectAction.overrideAll(buildVariables);
                 build.addAction(envInjectAction);
 
-                executor.interrupt(result, new PluginCauseOfInterruption(jobHash, buildNum));
+                executor.interrupt(cachedResult, new PluginCauseOfInterruption(jobHash, buildNum));
             }
         }
     }

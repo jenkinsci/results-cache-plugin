@@ -10,6 +10,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
+import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.resultscache.model.BuildConfig;
@@ -110,9 +111,7 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
 
         private void saveResultToCache(AbstractBuild<?, ?> build, TaskListener listener, String jobHash) {
             try {
-                EnvVars environment = build.getEnvironment(listener);
-                Integer buildNum = Integer.valueOf(environment.getOrDefault(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME, String.valueOf(build.getNumber())));
-
+                int buildNum = calculateBuildNumber(build, listener);
                 JobResult jobResult = new JobResult(build.getResult(), buildNum);
                 postResultToCache(listener, jobHash, jobResult);
             } catch (IOException e) {
@@ -120,6 +119,16 @@ public class ResultsCacheBuildWrapper extends BuildWrapper {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+
+        private int calculateBuildNumber(AbstractBuild<?, ?> build, TaskListener listener) throws IOException, InterruptedException {
+            if (build.getResult() == Result.SUCCESS) {
+                EnvVars environment = build.getEnvironment(listener);
+                return environment.containsKey(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME) ?
+                        Integer.parseInt(environment.get(CACHED_RESULT_BUILD_NUM_ENV_VAR_NAME)) :
+                        build.getNumber();
+            }
+            return build.getNumber();
         }
 
         private void postResultToCache(TaskListener listener, String jobHash, JobResult jobResult) {
