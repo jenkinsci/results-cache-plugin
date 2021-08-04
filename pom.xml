@@ -16,7 +16,7 @@
     <groupId>com.king.jenkins.plugins</groupId>
     <artifactId>results-cache</artifactId>
     <packaging>hpi</packaging>
-    <version>${revision}${changelist}</version>
+    <version>2.0.2</version>
     <name>Results Cache Plugin</name>
     <description>This plugins enables a jobs results cache in order to avoid repeated successful executions</description>
     <url>https://github.com/jenkinsci/results-cache-plugin</url>
@@ -76,7 +76,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/results-cache-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/results-cache-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/results-cache-plugin</url>
-        <tag>${scmTag}</tag>
+        <tag>results-cache-2.0.2</tag>
     </scm>
 
     <developers>
