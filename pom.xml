@@ -88,19 +88,6 @@
         <tag>${scmTag}</tag>
     </scm>
 
-    <developers>
-        <developer>
-            <id>franciscoord</id>
-            <name>Francisco Javier Garcia Orduna</name>
-            <email>francisco.orduna@king.com</email>
-        </developer>
-        <developer>
-            <id>kargath</id>
-            <name>David Campos Vall</name>
-            <email>david.campos@king.com</email>
-        </developer>
-    </developers>
-
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
