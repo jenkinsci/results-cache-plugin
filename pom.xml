@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>envinject</artifactId>
-            <version>2.1.6</version>
+            <version>2.926.v69c9b_3896a_96</version>
             <optional>true</optional>
         </dependency>
         <dependency>
